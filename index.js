@@ -1,3 +1,13 @@
+const nameReducer = (state = "Reduxing", action) => {
+  switch (action.type) {
+    case "CHANGE_NAME":
+        return action.value
+    default:
+      return state;
+  }
+};
+
+
 const counterReducer = (state = 0, action) => {
   switch (action.type) {
     case "INCREMENT":
@@ -10,45 +20,53 @@ const counterReducer = (state = 0, action) => {
   }
 };
 
-const nameReducer = (state = "", action) => {
-  switch (action.type) {
-    case "CHANGE_NAME":
-        return action.value
-    default:
-      return state;
+
+// Combining the two reducers into One
+const rootReducer = (state = {} ,action) => {
+  return {
+
+// State here is an object {
+// counter : return value from counterReducer 
+// name : return value nameReducer }
+
+    counter : counterReducer(state.counter, action),
+    name : nameReducer(state.name, action)
   }
-};
 
-
+}
 
 const {createStore} = Redux;
 
-
 // Pass in a reducer argument
 
-const store = createStore(nameReducer);
+const store = createStore(rootReducer);
 
 
 
+const CounterComponent = ({state, onIncrement, onChange , onDecrement, upperCase, saveName}) => {
 
-// const anotherStore = createStore(changeText);
 
-
-const CounterComponent = ({count, onIncrement, onChange , onDecrement, upperCase, saveName}) => {
 
 let input;
 // ref={node => {input=node}} = Used to Access inside the input and change the input
   return (<div>
     <input type="text" ref={node => {input=node}}   />
+    <button onClick={() => saveName(input)}>Save Name</button><br/>
+      Name : {upperCase.name}
     <br/>
-    counter: {count}
+    counter: {upperCase.counter}<br/>
+
+
 
     <button onClick={onIncrement}>+</button>
-    <button onClick={onDecrement}>-</button>
-    <button onClick={() => saveName(input)}>Save Name</button><br/>
-    Name : {upperCase}
+    <button onClick={onDecrement}>-</button><br/>
+
+
   </div>)
 };
+
+
+// Dispatch an Action Parameter Object with type(required) & value (can be multiple)
 
 const onIncrement = () => {
   store.dispatch({type: 'INCREMENT', value: 1})
@@ -59,7 +77,7 @@ const onDecrement = () => {
 };
 
 
-// Used to change the state LIKE setState ({ })
+// Used to change the state similar to setState ({ })
 
 // const onChange = () => {
 //   anotherStore.dispatch({type: 'CHANGE', value: "a"})
@@ -87,14 +105,17 @@ const nameSaved = (input) => {
 
 const render = () => {
 
-  ReactDOM.render(<CounterComponent   upperCase={store.getState()} onIncrement={onIncrement} saveName={nameSaved} onDecrement={onDecrement} />, document.getElementById('root'));
+  ReactDOM.render(<CounterComponent upperCase={store.getState()}
+  onIncrement={onIncrement} saveName={nameSaved} onDecrement={onDecrement} />,
+  document.getElementById('root'));
 };
 
+
+// Redux communicates with React via store.subscribe
+
 store.subscribe(render);
-// anotherStore.subscribe(render);
 
 
 console.log(store);
-// console.log(anotherStore);
 
 render();
